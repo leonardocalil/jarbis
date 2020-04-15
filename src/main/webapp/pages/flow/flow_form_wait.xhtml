@@ -1,0 +1,37 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+
+    <h:panelGrid columns="2" rendered="#{waitAction ne NULL}">
+    	<h:outputLabel
+			value="#{msg['content.flow.dialog.action.field.type.label']}"
+			style="float: right;" />
+		<p:selectOneMenu style="width: 10px;" value="#{waitAction.fieldType}" >
+			
+			<f:selectItems value="#{formFieldTypes}" />
+		</p:selectOneMenu>
+		<h:outputLabel
+			value="#{msg['content.flow.dialog.action.field.name.label']}" 
+			style="float: right;"/>
+		<p:inputText
+					value="#{waitAction.fieldName}" 
+					required="#{waitAction ne NULL}"
+					requiredMessage="#{msg['form.field.action.wait.name.required.label']}"
+					style="width: 400px;" />
+		<h:outputLabel
+			value="#{msg['content.flow.dialog.action.timeout.label']}" 
+			style="float: right;"/>
+		
+		<p:inputNumber 
+					value="#{waitAction.timeOut}"
+					required="#{waitAction ne NULL}"
+					requiredMessage="#{msg['form.field.action.wait.timeout.required.label']}"
+				style="width: 400px;" />
+		
+    </h:panelGrid>
+					
+
+</ui:composition>

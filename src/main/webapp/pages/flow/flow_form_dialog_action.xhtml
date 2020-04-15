@@ -1,0 +1,142 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form id="frmActionFormDialog" rendered="#{bean.actionSelected != null}">
+		<p:commandButton icon="ui-icon-disk" value="#{msg['form.button.save.label']}"
+								actionListener="#{bean.saveStep}" style="position: absolute;right: 16px;"
+								update="frmFlowFormActions" />
+		<h:panelGrid columns="2">
+			<h:outputLabel
+				value="#{msg['content.flow.dialog.action.pre.wait.label']}" />
+			<p:selectBooleanCheckbox value="#{bean.actionSelected.waitPreAction}" onchange="#{bean.changeWaitPreAction()}">
+				<p:ajax update="frmActionFormDialog" event="change" immediate="true" />
+			</p:selectBooleanCheckbox>
+		</h:panelGrid>
+
+		<p:panel header="#{msg['content.flow.dialog.action.wait.label']}"
+			rendered="#{bean.actionSelected.waitPreAction}">
+			<ui:include src="flow_form_wait.xhtml">
+				<ui:param name="formFieldTypes" value="#{bean.formFieldTypes}" />
+				<ui:param name="waitAction"
+					value="#{bean.actionSelected.preAction}" />
+			</ui:include>
+		</p:panel>
+		<p:separator />
+		<h:panelGrid columns="2">
+		
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.dialog.decision.field.decision.sequence.label']}" />
+			<p:inputText value="#{bean.actionSelected.sequence}"  readonly="true" />
+			
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.name.label']}" />
+			<p:inputText value="#{bean.actionSelected.name}"
+				style="width: 400px;" required="true" requiredMessage="#{msg['form.field.action.name.required.label']}"/>
+				
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.dialog.action.field.type.label']}" />
+			<p:selectOneMenu style="width: 50px;"
+				value="#{bean.actionSelected.fieldType}">
+
+				<f:selectItems value="#{bean.formFieldTypes}" />
+			</p:selectOneMenu>
+			<h:outputLabel style="float: right;" 
+				value="#{msg['content.flow.dialog.action.field.name.label']}" />
+			<p:inputText value="#{bean.actionSelected.fieldName}"
+				style="width: 400px;" required="true" requiredMessage="#{msg['form.field.action.field.required.label']}" />
+				
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.dialog.action.field.action.label']}" />
+			<p:selectOneMenu style="width: 50px;"
+				value="#{bean.actionSelected.doAction}">
+
+				<p:ajax update="frmActionFormDialog" listener="#{bean.changeTypeAction}"  />
+						
+				<f:selectItems value="#{bean.formFieldActions}" 
+							   var="typeAction" 
+							   itemValue="#{typeAction}"
+							   itemLabel="#{msg[typeAction.label]}"  />
+			</p:selectOneMenu>
+			
+			<h:outputLabel style="float: right;"
+				rendered="#{bean.actionSelected.doAction eq 'WRITE'}"
+				value="#{msg['content.flow.dialog.action.write.type.label']}" />
+			
+			<p:selectOneRadio value="#{bean.actionSelected.typeWrite}" rendered="#{bean.actionSelected.doAction eq 'WRITE'}">
+	            <p:ajax update="frmActionFormDialog" listener="#{bean.changeTypeWrite}" />
+	            <f:selectItems value="#{bean.formFieldTypeWrites}" 
+							   var="typeWrite" 
+							   itemValue="#{typeWrite}"
+							   itemLabel="#{msg[typeWrite.label]}" />
+	        </p:selectOneRadio>
+	        
+			<h:outputLabel style="float: right;"
+			    rendered="#{bean.actionSelected.typeWrite eq 'CONSTANT'}"
+				value="#{msg['content.flow.dialog.action.text.label']}" />
+			
+			<p:inputTextarea value="#{bean.actionSelected.parameter.text}" cols="70" rows="10" rendered="#{bean.actionSelected.typeWrite eq 'CONSTANT'}" />
+			
+			<h:outputLabel style="float: right;"
+				rendered="#{bean.actionSelected.typeWrite eq 'VARIABLE'}"
+				value="#{msg['content.flow.dialog.action.groups.label']}" />
+					
+			<p:selectOneMenu style="width: 50px;" rendered="#{bean.actionSelected.typeWrite eq 'VARIABLE'}" 
+				value="#{bean.actionSelected.parameter.groupActionId}">
+
+				<p:ajax update="frmActionFormDialog" listener="#{bean.changeVariableGroup}" />
+				<f:selectItem itemValue="" itemLabel="#{msg['content.select']}"  />
+						
+				<f:selectItems value="#{bean.groups}" var="group" itemValue="#{group.rowId}" itemLabel="#{group.name}" />
+			</p:selectOneMenu>
+			
+			<h:outputLabel style="float: right;"
+				rendered="#{bean.actionSelected.typeWrite eq 'VARIABLE'}"
+				value="#{msg['content.flow.dialog.action.actions.label']}" />
+					
+			<p:selectOneMenu style="width: 50px;" rendered="#{bean.actionSelected.typeWrite eq 'VARIABLE'}" 
+				value="#{bean.actionSelected.parameter.actionId}"  >
+
+				<f:selectItem itemValue="" itemLabel="#{msg['content.select']}"  />		
+				<f:selectItems value="#{bean.getElegibleActions()}"  
+							   var="actionStep" 
+							   itemValue="#{actionStep.rowId}"
+							   itemLabel="#{actionStep.name}"  />
+			</p:selectOneMenu>
+			
+<!-- 			<h:outputLabel style="float: right;" -->
+<!-- 				rendered="#{bean.actionSelected.parameter ne NULL  -->
+<!-- 							and bean.actionSelected.parameter.actionStep ne NULL -->
+<!-- 							and bean.actionSelected.parameter.actionStep.doAction eq 'READ_TABLE'}" -->
+<!-- 				value="#{msg['content.flow.dialog.action.index.column.label']}" /> -->
+				
+				
+<!-- 			<p:inputNumber rendered="#{bean.actionSelected.parameter ne NULL  -->
+<!-- 										and bean.actionSelected.parameter.actionStep ne NULL -->
+<!-- 										and bean.actionSelected.parameter.actionStep.doAction eq 'READ_TABLE'}" -->
+<!-- 				value="#{bean.parameterSelected.text}" style="width: 10px;" />  -->
+			
+						
+		</h:panelGrid>
+		<p:separator />
+		<h:panelGrid columns="2">
+			<h:outputLabel
+				value="#{msg['content.flow.dialog.action.pos.wait.label']}" />
+			<p:selectBooleanCheckbox value="#{bean.actionSelected.waitPosAction}">
+				<p:ajax update="frmActionFormDialog" listener="#{bean.changeWaitPosAction()}" event="change"/>
+			</p:selectBooleanCheckbox>
+		</h:panelGrid>
+		<p:panel header="#{msg['content.flow.dialog.action.wait.label']}"
+			rendered="#{bean.actionSelected.waitPosAction}">
+			<ui:include src="flow_form_wait.xhtml">
+				<ui:param name="formFieldTypes" value="#{bean.formFieldTypes}" />
+				<ui:param name="waitAction"
+					value="#{bean.actionSelected.posAction}" />
+			</ui:include>
+		</p:panel>
+	
+	</h:form>
+
+</ui:composition>

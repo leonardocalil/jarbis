@@ -1,0 +1,17 @@
+<ui:composition template="/template/LayoutPadrao.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titulo">Jarbis - Admin</ui:define>
+
+	<ui:define name="corpo">
+		<div id="title">
+			<h1><ui:insert name="titleContent"/></h1>
+		</div>
+		<ui:insert name="bodyContent"/>
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,66 @@
+<ui:composition template="/template/ContentTemplate.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titleContent">#{msg['page.title.flow.search.label']}</ui:define>
+
+	<ui:define name="bodyContent">
+		<h:form id="frmFlowPesquisa">
+			<p:panelGrid columns="4" >
+				<h:outputLabel value="#{msg['content.flow.search.label']}" for="pesquisa" />
+				<h:inputText id="pesquisa"
+					value="#{flowSearch.nameSearch}" style="width: 400px;" />
+				<p:commandButton icon="ui-icon-search" action="#{flowSearch.search()}" update="tableResult"
+					onclick="$('itemListases').clearFilters(); return false;" />
+				<p:commandButton icon="ui-icon-plus" action="#{flowForm.addFlow()}" update="tableResult"/>
+			</p:panelGrid>
+			<br />
+			<p:dataTable paginator="true" rows="50" widgetVar="itemListases"
+				emptyMessage="#{msg['content.flow.table.empty']}" 
+				id="tableResult"
+				value="#{flowSearch.flows}" var="flow" border="1"
+				cellpadding="5">
+				<p:column headerText="#{msg['content.flow.table.column.name']}">
+					<h:outputText value="#{flow.name}" />
+				</p:column>
+				<p:column headerText="#{msg['content.flow.table.column.frequence']}">
+					<h:outputText value="#{msg[flow.frequence.description]}" />
+				</p:column>
+				<p:column headerText="#{msg['content.flow.table.column.interval']}">
+					<h:outputText rendered="#{flow.frequence eq 'CYCLIC_MINUTE'}"  value="#{flow.frequenceInterval.interval}" />
+				</p:column>
+				<p:column headerText="#{msg['content.flow.table.column.week']}">
+					
+					<p:dataTable styleClass="noHeader" var="wd" value="#{flow.frequenceWeekDay}" rendered="#{flow.frequence eq 'CYCLIC_WEEKDAY'}">
+					    <p:column>
+					        <h:outputText value="#{msg[wd.weekDay.label]}" />
+					    </p:column>
+					    <p:column>
+					        <h:outputText value="#{wd.scheduledTime}">
+					        	<f:convertDateTime pattern="HH:mm:ss" />
+					        </h:outputText>
+					    </p:column>
+    				</p:dataTable>
+				</p:column>
+				<p:column headerText="#{msg['content.flow.table.column.datetime']}">
+					<p:dataTable var="date" value="#{flow.frequenceDateTime}" rendered="#{flow.frequence eq 'SCHEDULED'}">
+					    <p:column>
+					        <h:outputText value="#{date.dateTime}">
+					        	<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+					        </h:outputText>
+					    </p:column>
+    				</p:dataTable>
+				</p:column>
+				
+				<p:column headerText="#{msg['content.flow.table.column.function']}">
+					<p:commandButton icon="ui-icon-pencil" action="#{flowForm.editFlow(flow)}" />
+				</p:column>
+				
+			</p:dataTable>
+		</h:form>
+	</ui:define>
+
+</ui:composition>

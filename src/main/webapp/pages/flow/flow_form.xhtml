@@ -1,0 +1,405 @@
+<ui:composition template="/template/ContentTemplate.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<ui:define name="titleContent">#{msg['page.title.flow.form.label']}</ui:define>
+
+	<ui:define name="bodyContent">
+		<h:form id="frmFlowForm">
+			<p:growl id="message" autoUpdate="true" />
+			<p:panelGrid columns="2">
+				<p:outputLabel value="#{msg['content.flow.name.label']}"
+					for="flow_nome" />
+				<p:inputText id="flow_nome" value="#{flowForm.flow.name}"
+					style="width: 400px;" 
+					required="#{not empty param['frmFlowForm:buttonSaveFlow']}" 
+					requiredMessage="#{msg['content.flow.name.required.label']}"/>
+
+				<h:outputLabel value="#{msg['content.flow.scheduled.label']}"
+					for="flow_scheduled" />
+				<p:selectOneMenu id="flow_scheduled" style="width: 400px;"
+					value="#{flowForm.flow.frequence}">
+					<p:ajax update="frmFlowForm" listener="#{flowForm.changeFrequence}" immediate="false" />
+					<f:selectItems value="#{flowForm.typeFrequences}" var="type"
+						itemValue="#{type}" itemLabel="#{msg[type.description]}" />
+				</p:selectOneMenu>
+
+				<h:outputLabel
+					value="#{msg['content.flow.type.schedule.minute.label']}"
+					for="flow_typeScheduled_minute"
+					id="flow_typeScheduled_minute_label"
+					rendered="#{flowForm.flow.frequence eq null or flowForm.flow.frequence == 'CYCLIC_MINUTE'}" />
+
+				<p:panelGrid id="flow_typeScheduled_minute" columns="3"
+					rendered="#{flowForm.flow.frequence eq null or flowForm.flow.frequence == 'CYCLIC_MINUTE'}">
+
+					<p:selectOneMenu id="flow_typeScheduled_minute_selectOne"
+						style="width: 10px;" value="#{flowForm.flow.frequenceInterval.interval}">
+						<f:selectItem itemValue="5" itemLabel="5 min" />
+						<f:selectItem itemValue="10" itemLabel="10 min" />
+						<f:selectItem itemValue="15" itemLabel="15 min" />
+						<f:selectItem itemValue="20" itemLabel="20 min" />
+						<f:selectItem itemValue="25" itemLabel="25 min" />
+						<f:selectItem itemValue="30" itemLabel="30 min" />
+						<f:selectItem itemValue="45" itemLabel="45 min" />
+						<f:selectItem itemValue="60" itemLabel="1 h" />
+						<f:selectItem itemValue="120" itemLabel="2 h" />
+						<f:selectItem itemValue="180" itemLabel="3 h" />
+						<f:selectItem itemValue="240" itemLabel="4 h" />
+						<f:selectItem itemValue="300" itemLabel="5 h" />
+						<f:selectItem itemValue="360" itemLabel="6 h" />
+						<f:selectItem itemValue="720" itemLabel="12 h" />
+						<f:selectItem itemValue="1080" itemLabel="18 h" />
+						<f:selectItem itemValue="1440" itemLabel="24 h" />
+					</p:selectOneMenu>
+
+					<h:outputLabel
+						value="#{msg['content.flow.type.schedule.active.label']}"
+						for="flow_typeScheduled_minute_active" />
+					<p:selectBooleanCheckbox id="flow_typeScheduled_minute_active"
+						value="#{flowForm.flow.frequenceInterval.active}" />
+
+				</p:panelGrid>
+				<h:outputLabel
+					value="#{msg['content.flow.type.schedule.weekday.label']}"
+					for="flow_typeScheduled_weedkay"
+					id="flow_typeScheduled_weedkay_label"
+					rendered="#{flowForm.flow.frequence == 'CYCLIC_WEEKDAY'}" />
+
+				<p:panelGrid id="flow_typeScheduled_weedkay" columns="6"
+					rendered="#{flowForm.flow.frequence == 'CYCLIC_WEEKDAY'}">
+
+					<p:outputLabel
+						value="#{msg['content.flow.type.schedule.weekday.week.label']}"
+						for="flow_typeScheduled_weedkay_week" />
+					<p:selectOneMenu id="flow_typeScheduled_weedkay_week"
+						style="width: 10px;" value="#{flowForm.frequenceWeekDaySelected.weekDay}">
+
+						<f:selectItems value="#{flowForm.weekDays}" var="weekDay"
+							itemValue="#{weekDay}" itemLabel="#{msg[weekDay.label]}" />
+					</p:selectOneMenu>
+					<p:outputLabel
+						for="flow_typeScheduled_weedkay_hour" 
+						value="#{msg['content.flow.type.schedule.weekday.hour.label']}"/>						
+					<p:calendar id="flow_typeScheduled_weedkay_hour" 
+								value="#{flowForm.frequenceWeekDaySelected.scheduledTime}" 
+								required="#{not empty param['frmFlowForm:buttonAddFrequenceWeekDay'] }"
+								requiredMessage="#{msg['message.error.required.field.hour']}"
+								pattern="HH:mm" locale="pt_BR" timeOnly="true"  />
+
+					<p:column>
+						<h:commandButton value="#{msg['page.button.new.label']}" action="#{flowForm.newFrequenceWeekDay()}" />
+						<h:commandButton value="#{msg['page.button.upd.label']}" rendered="#{!flowForm.frequenceWeekDaySelected.isNewObject()}" action="#{flowForm.updateFrequenceWeekDay()}" />
+						<h:commandButton id="buttonAddFrequenceWeekDay" value="#{msg['page.button.add.label']}" 
+										 rendered="#{flowForm.frequenceWeekDaySelected.isNewObject()}" 
+										 action="#{flowForm.addFrequenceWeekDay()}" />
+						
+					</p:column>
+					
+					<p:dataTable id="dataTableFrequenceWeekDay" 
+						var="weekDay" 
+						value="#{flowForm.flow.frequenceWeekDay}"
+						emptyMessage="#{msg['content.table.empty']}">
+						<f:facet name="header">
+					        #{msg['content.flow.type.weekday.table.header.label']}	
+					    </f:facet>
+						<p:column
+							headerText="#{msg['content.flow.type.weekday.table.column.weekday.label']}">
+							<h:outputText value="#{msg[weekDay.weekDay.label]}" />
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.type.weekday.table.column.hora.label']}">
+							<h:outputText value="#{weekDay.scheduledTime}">
+								<f:convertDateTime pattern="HH:mm" timeZone="GMT-03:00" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.type.schedule.active.label']}">
+							<p:selectBooleanCheckbox value="#{weekDay.active}">
+								<p:ajax update="frmFlowForm:message"
+									listener="#{flowForm.changeWeekDayStatus(weekDay)}" />
+							</p:selectBooleanCheckbox>
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.table.column.function']}">
+							<p:commandButton action="#{flowForm.editFrequenceWeekDay(weekDay)}" update="frmFlowForm:message,frmFlowForm:flow_typeScheduled_weedkay" style="margin-right:5px;" icon="ui-icon-pencil" title="#{msg['button.edit']}" />
+							<p:commandButton action="#{flowForm.setFrequenceWeekDayForRemove(weekDay)}" 
+											 oncomplete="PF('dialogConfirmeDeleteFrequenceWeekDay').show();"
+											 update="formDialogConfirmeDeleteFrequenceWeekDay" 
+											 icon="ui-icon-trash" title="#{msg['button.delete']}" />
+						</p:column>
+						
+
+					</p:dataTable>
+
+				</p:panelGrid>
+				<h:outputLabel
+					value="#{msg['content.flow.type.schedule.date.label']}"
+					for="flow_scheduled" id="flow_typeScheduled_datetime_label"
+					rendered="#{flowForm.flow.frequence == 'SCHEDULED'}" />
+
+
+				<p:panelGrid id="flow_typeScheduled_datetime" columns="4"
+					rendered="#{flowForm.flow.frequence == 'SCHEDULED'}">
+
+					<p:outputLabel for="flow_scheduled_datetime" value="#{msg['content.flow.type.schedule.datetime.label']}:" />
+					<p:calendar id="flow_scheduled_datetime"
+								required="#{not empty param['frmFlowForm:buttonAddFrequenceDateTime'] }"
+								requiredMessage="#{msg['message.error.required.field.datetime']}"
+								value="#{flowForm.frequenceDateTimeSelected.dateTime}" pattern="dd/MM/yyyy HH:mm:ss" />
+
+					<p:column>
+						<h:commandButton value="#{msg['page.button.new.label']}" action="#{flowForm.newFrequenceDateTime()}" />
+						<h:commandButton value="#{msg['page.button.upd.label']}" rendered="#{!flowForm.frequenceDateTimeSelected.isNewObject()}" action="#{flowForm.updateFrequenceDateTime()}" />
+						<h:commandButton id="buttonAddFrequenceDateTime" value="#{msg['page.button.add.label']}" rendered="#{flowForm.frequenceDateTimeSelected.isNewObject()}" action="#{flowForm.addFrequenceDateTime()}" />
+					</p:column>
+					<p:dataTable id="dataTableFrequenceDateTime" var="scheduled" value="#{flowForm.flow.frequenceDateTime}"
+						emptyMessage="#{msg['content.table.empty']}">
+						<f:facet name="header">
+					        #{msg['content.flow.type.scheduled.table.header.label']}	
+					    </f:facet>
+						<p:column
+							headerText="#{msg['content.flow.type.scheduled.table.column.datetime.label']}">
+							<h:outputText value="#{scheduled.dateTime}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" timeZone="GMT-03:00" />
+							</h:outputText>
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.type.schedule.active.label']}">
+							<p:selectBooleanCheckbox value="#{scheduled.active}">
+								<p:ajax update="frmFlowForm:message"
+									listener="#{flowForm.changeScheduledStatus(scheduled)}" />
+							</p:selectBooleanCheckbox>
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.table.column.function']}">
+							<p:commandButton action="#{flowForm.editFrequenceDateTime(scheduled)}" update="frmFlowForm:message,frmFlowForm:flow_typeScheduled_datetime" style="margin-right:5px;" icon="ui-icon-pencil" title="#{msg['button.edit']}" />
+							<p:commandButton action="#{flowForm.setFrequenceDateTimeForRemove(scheduled)}" 
+											 oncomplete="PF('dialogConfirmeDeleteFrequenceDateTime').show();"
+											 update="formDialogConfirmeDeleteFrequenceDateTime" 
+											 icon="ui-icon-trash" title="#{msg['button.delete']}" />
+											 
+						</p:column>
+					</p:dataTable>
+
+				</p:panelGrid>			
+
+			</p:panelGrid>			
+			<h:panelGrid   columnClasses="alignTop">
+				<p:commandButton id="buttonSaveFlow"  icon="ui-icon-disk" value="#{msg['form.button.save.label']}"
+								actionListener="#{flowForm.saveFlow}" 
+								update="frmFlowFormActions,frmFlowForm" />
+			</h:panelGrid>
+		
+			
+			<h3>#{msg['content.flow.groups.action.label']}</h3>
+			<p:tree value="#{flowForm.root}" var="node" orientation="horizontal"
+				selectionMode="single" selection="#{flowForm.selectedNode}"
+				rendered="#{flowForm.flow.getGroupActions().size() > 0}" >
+				<p:ajax event="select" update="frmFlowFormActions" />
+				<p:treeNode>
+					<h:outputText value="#{node}" />
+				</p:treeNode>
+			</p:tree>
+			<p:outputPanel id="treeEmptyMessage">
+                   <h:outputText  value="#{msg['content.flow.empty']}" rendered="#{flowForm.flow.getGroupActions().size() == 0}"/>
+            </p:outputPanel>
+		</h:form>
+		<h:form id="frmFlowFormActions">
+			<p:panel id="panelGroupAction"
+				header="#{msg['content.flow.actions.label']}"
+				style="margin-top:10px"
+				rendered="#{flowForm.groupActionSelected != null}">
+				<h:panelGrid columns="2">
+					<p:outputLabel value="#{msg['content.flow.groups.name.label']}" for="groupActionNameId" />
+					<p:inputText id="groupActionNameId" value="#{flowForm.groupActionSelected.name}"
+						style="width: 400px;"
+						required="true" requiredMessage="#{msg['form.field.group.action.name.required.label']}">
+							<p:ajax event="keyup" listener="#{flowForm.setEdited(flowForm.groupActionSelected)}" immediate="true" />
+					</p:inputText>
+					<p:outputLabel
+						value="#{msg['content.flow.groups.description.label']}" />
+					<p:inputText value="#{flowForm.groupActionSelected.description}"
+						style="width: 400px;">
+							<p:ajax event="keyup" listener="#{flowForm.setEdited(flowForm.groupActionSelected)}" />
+					</p:inputText>
+					<p:outputLabel for="groupActionUrlId" value="#{msg['content.flow.groups.url.label']}" />
+					<p:inputText id="groupActionUrlId" value="#{flowForm.groupActionSelected.url}"
+						style="width: 400px;" required="true" requiredMessage="#{msg['form.field.group.action.url.required.label']}">
+						<p:ajax event="keyup" listener="#{flowForm.setEdited(flowForm.groupActionSelected)}" />
+					</p:inputText>
+				</h:panelGrid>
+				<h:panelGrid columns="2" columnClasses="alignTop">
+					<p:commandButton icon="ui-icon-disk" value="#{msg['form.button.save.label']}"
+									action="#{flowForm.saveGroupActions}" 
+									update="frmFlowFormActions,frmFlowForm" />
+				</h:panelGrid>
+
+				<h:panelGrid columns="3" columnClasses="alignTop,alignTop" >
+					<p:dataTable id="tableActionSteps" var="action"
+						value="#{flowForm.groupActionSelected.actions}"
+						emptyMessage="#{msg['content.table.empty']}"  
+						draggableRows="true">
+						 <p:ajax event="rowReorder" update="@this" listener="#{flowForm.onActionReorder}" />
+						<f:facet name="header">
+					    	#{msg['content.flow.actions.stepbystep.label']} 
+					    	<p:spacer width="20" />
+							<p:commandButton icon="ui-icon-plus"
+								action="#{flowForm.addStep}"
+								update="dialogAction" />
+						</f:facet>
+						<p:column 
+							headerText="#{msg['content.flow.decision.table.column.sequence.label']}"
+							style="width:15%" >
+							<h:outputText value="#{action.sequence}" />
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.actions.table.column.name.label']}"
+							style="width:75%">
+							<h:outputText value="#{action.name}" />
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.actions.table.column.functions.label']}">
+							<p:commandButton icon="ui-icon-pencil"
+								actionListener="#{flowForm.editStep(action)}" 
+								oncomplete="PF('dialogAction').show();" update="dialogAction" />
+							<p:spacer width="5" />
+							<p:commandButton icon="ui-icon-trash"
+											 oncomplete="PF('dialogConfirmeDeleteAction').show();"
+											 update="formDialogConfirmeDeleteAction" 
+											 actionListener="#{flowForm.setActionForRemove(action)}" />
+							
+						</p:column>
+
+
+					</p:dataTable>
+					<p:dataTable id="tableActionDecision" var="decision"
+						value="#{flowForm.groupActionSelected.decisions}"
+						emptyMessage="#{msg['content.table.empty']}" 
+						draggableRows="true">
+						<p:ajax event="rowReorder" update="@this" listener="#{flowForm.onDecisionReorder}" />
+						<f:facet name="header">
+					        #{msg['content.flow.actions.decision.label']} 
+					    	<p:spacer width="20" />
+							<p:commandButton icon="ui-icon-plus"			
+								action="#{flowForm.addDecision}" update="dialogDecision"  />
+						</f:facet>
+						<p:column 
+							headerText="#{msg['content.flow.decision.table.column.sequence.label']}"
+							style="width:20%" >
+							<h:outputText value="#{decision.sequence}" />
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.actions.table.column.name.label']}"
+							style="width:60%">
+							<h:outputText value="#{decision.name}" />
+						</p:column>
+						<p:column
+							headerText="#{msg['content.flow.actions.table.column.functions.label']}">
+							<p:commandButton icon="ui-icon-pencil"
+								actionListener="#{flowForm.editDecision(decision)}" 
+								oncomplete="PF('dialogDecision').show();" update="dialogDecision" />
+							<p:spacer width="5" />
+							<p:commandButton icon="ui-icon-trash"
+											 oncomplete="PF('dialogConfirmeDeleteDecision').show();"
+											 update="formDialogConfirmeDeleteDecision" 
+											 actionListener="#{flowForm.setDecisionForRemove(decision)}" />	
+						</p:column>
+
+					</p:dataTable>
+				</h:panelGrid>
+			</p:panel>
+		</h:form>
+		
+		<p:dialog id="dialogConfirmeDeleteFrequenceWeekDay"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmeDeleteFrequenceWeekDay" modal="true" minHeight="100">
+			<h:form id="formDialogConfirmeDeleteFrequenceWeekDay">
+				<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.register']}?" /><br /><br />
+				<h:panelGrid columns="2">
+					<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+							        		actionListener="#{flowForm.removeFrequenceWeekDay}"
+							        		update="@([id$=dataTableFrequenceWeekDay])" 
+							        		oncomplete="PF('dialogConfirmeDeleteFrequenceWeekDay').hide();"
+							        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+									 oncomplete="PF('dialogConfirmeDeleteFrequenceWeekDay').hide()" 
+									styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog id="dialogConfirmeDeleteFrequenceDateTime"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmeDeleteFrequenceDateTime" modal="true" minHeight="100">
+			<h:form id="formDialogConfirmeDeleteFrequenceDateTime">
+				<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.register']}?" /><br /><br />
+				<h:panelGrid columns="2">
+					<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+							        		actionListener="#{flowForm.removeFrequenceDateTime}"
+							        		update="@([id$=dataTableFrequenceDateTime])" 
+							        		oncomplete="PF('dialogConfirmeDeleteFrequenceDateTime').hide();"
+							        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+									 oncomplete="PF('dialogConfirmeDeleteFrequenceDateTime').hide()" 
+									styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+
+		<p:dialog id="dialogAction"
+			header="#{msg['content.flow.dialog.action.header.label']}"
+			widgetVar="dialogAction" modal="true" minHeight="100" >
+			<ui:include src="flow_form_dialog_action.xhtml">
+				<ui:param name="bean" value="#{flowForm}" />
+			</ui:include>
+		</p:dialog>
+
+		<p:dialog id="dialogDecision" 
+			header="#{msg['content.flow.dialog.decision.header.label']}" 
+			widgetVar="dialogDecision" modal="true" minHeight="150" minWidth="500" width="600" height="250">
+			<ui:include src="flow_form_dialog_decision.xhtml">
+				<ui:param name="bean" value="#{flowForm}" />
+			</ui:include>
+			
+		</p:dialog>
+		
+		<p:dialog id="dialogConfirmeDeleteAction"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmeDeleteAction" modal="true" minHeight="100">
+			<h:form id="formDialogConfirmeDeleteAction">
+				<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.action']} #{flowForm.actionSelectedForRemove.name}?" /><br /><br />
+				<h:panelGrid columns="2">
+					<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+							        		actionListener="#{flowForm.removeAction}"
+							        		update="@([id$=tableActionSteps])" 
+							        		oncomplete="PF('dialogConfirmeDeleteAction').hide();"
+							        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+									 oncomplete="PF('dialogConfirmeDeleteAction').hide()" 
+									styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+		<p:dialog id="dialogConfirmeDeleteDecision"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmeDeleteDecision" modal="true" minHeight="100">
+			<h:form id="formDialogConfirmeDeleteDecision">
+				<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.decision']} #{flowForm.decisionSelectedForRemove.name}?" /><br /><br />
+				<h:panelGrid columns="2">
+					<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+							        		actionListener="#{flowForm.removeDecision}"
+							        		update="@([id$=tableActionDecision])" 
+							        		oncomplete="PF('dialogConfirmeDeleteDecision').hide();"
+							        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+					<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+									 oncomplete="PF('dialogConfirmeDeleteDecision').hide()" 
+									styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+				</h:panelGrid>
+			</h:form>
+		</p:dialog>
+	</ui:define>
+
+</ui:composition>

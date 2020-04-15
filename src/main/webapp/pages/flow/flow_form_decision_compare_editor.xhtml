@@ -1,0 +1,143 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form id="frmDecisionCompare" rendered="#{decisionSelected != null}">
+			
+	
+		<p:dataTable id="tableDecisionCompare"
+					 var="logicalOperation" 
+					 emptyMessage="#{msg['content.table.empty']}"
+					 value="#{decisionSelected.logicalOperations}" 
+					 editable="true" editMode="cell">
+			
+	        <p:column style="width:25%">
+	            <f:facet name="header">
+			        #{msg['content.flow.dialog.decision.column.logical.operator.label']} 
+			        <p:commandButton icon="ui-icon-plus" action="#{bean.addLogicalOperator(decisionSelected)}" immediate="true" update="tableDecisionCompare"/>	
+				</f:facet>
+	            <p:cellEditor >
+	                  <f:facet name="output">
+	                  		<h:outputText value="#{msg[logicalOperation.logicalOperator.label]}" rendered="#{logicalOperation.logicalOperator != NULL}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+	                  		<h:outputText value="#{msg['content.select']}" rendered="#{logicalOperation.logicalOperator == NULL}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+	                  </f:facet>
+	                  <f:facet name="input">
+	                  		<p:selectOneMenu style="width: 100px;"
+								value="#{logicalOperation.logicalOperator}" >
+								<f:selectItem itemValue="" itemLabel="#{msg['content.select']}"  noSelectionOption="true" />
+								<f:selectItems value="#{bean.formFieldLogicalOperators}"
+											   var="lo"
+											   itemValue="#{lo}"
+											   itemLabel="#{msg[lo.label]}"	 />
+							</p:selectOneMenu>
+	                  </f:facet>
+		        </p:cellEditor>
+	        </p:column>
+	        <p:column headerText="#{msg['content.flow.dialog.decision.column.relational.operator.label']}">
+	        	<p:dataTable id="tableRelationalOperator"
+	        				 var="operation" 
+	        				 value="#{logicalOperation.operations}" 
+	        				 emptyMessage="#{msg['content.table.empty']}"
+	        				 editable="true" editMode="cell" >
+	        				 
+	        		<f:facet name="header">
+					        <p:commandButton icon="ui-icon-plus" 
+					        				 action="#{bean.addRelationalOperator(logicalOperation)}" 
+					        				 rendered="#{logicalOperation ne NULL}"
+					        				 immediate="true"
+					        				 update="tableRelationalOperator"/>	
+					</f:facet>
+	        		<p:column headerText="#{msg['content.flow.dialog.decision.field.relational.opertor.column.action.label']}" >	        	
+	        			<p:cellEditor >
+			                  <f:facet name="output">
+			                  		<h:outputText rendered="#{operation.action ne NULL}" value="#{operation.action.name}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+			                  		<h:outputText rendered="#{operation.action eq NULL}" value="#{msg['content.select']}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+			                  </f:facet>
+			                  <f:facet name="input">
+			                  		<p:selectOneMenu style="width: 100px;text-align: center;"
+										value="#{operation.action}" converter="actionConverter" >
+										<f:selectItem itemValue="" itemLabel="#{msg['content.select']}"  noSelectionOption="true" />
+										<f:selectItems value="#{bean.actionsFromGroupAction}" 
+										   var="action" 
+										   itemValue="#{action}"
+										   itemLabel="#{action.name}"  />
+									</p:selectOneMenu>
+			                  </f:facet>
+		              	</p:cellEditor>
+	        		</p:column>
+	        		<p:column headerText="#{msg['content.flow.dialog.decision.field.relational.opertor.column.relational.operator.label']}" style="width:20%">
+	        			<p:cellEditor >
+			                  <f:facet name="output">
+			                  		<h:outputText value="#{msg['content.select']}" rendered="#{operation.operator == NULL}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+			                  		<h:outputText value="#{operation.operator.label}" rendered="#{operation.operator != NULL}" title="#{msg['content.flow.dialog.decision.field.relational.opertor.column.editor.hint.label']}"/>
+			                  </f:facet>
+			                  <f:facet name="input">
+			                  		<p:selectOneMenu style="width: 100px;text-align: center;"
+										value="#{operation.operator}">
+										<f:selectItem itemValue="" itemLabel="#{msg['content.select']}"  noSelectionOption="true" />
+										<f:selectItems value="#{bean.formFieldRelationalOperators}" 
+										   var="op" 
+										   itemValue="#{op}"
+										   itemLabel="#{op.label}"  />
+									</p:selectOneMenu>
+			                  </f:facet>
+		              	</p:cellEditor>
+	        		</p:column>
+	        		<p:column headerText="#{msg['content.flow.dialog.decision.field.relational.opertor.column.value.label']}">
+	        			<p:cellEditor >
+	        				<f:facet name="output"><h:outputText value="#{operation.value}"/></f:facet>
+	        				<f:facet name="input"><h:inputText value="#{operation.value}" /> </f:facet>
+	        			</p:cellEditor>
+	        		</p:column>
+	        		<p:column headerText="#{msg['content.flow.dialog.decision.column.function.label']}" style="width:15%">
+	        			<p:commandButton icon="ui-icon-trash"
+											 oncomplete="PF('dialogConfirmDeleteRelationalOperation').show()"
+											 update="@([id$=dialogConfirmDeleteRelationalOperation])"
+											 immediate="true"
+											 actionListener="#{bean.setRelationalOperatorForRemove(logicalOperation, operation)}" />
+	        		</p:column>
+	        	</p:dataTable>
+	        </p:column>	       
+	        <p:column headerText="#{msg['content.flow.dialog.decision.column.function.label']}" style="width:15%">
+       			<p:commandButton icon="ui-icon-trash"
+									 oncomplete="PF('dialogConfirmDeleteLogicalOperation').show()"
+									 update="@([id$=dialogConfirmDeleteLogicalOperation])"
+									 immediate="true"
+									 actionListener="#{bean.setLogicalOperatorForRemove(logicalOperation)}" />
+	        </p:column> 			        
+	    </p:dataTable>
+	    
+	    <h:panelGrid columns="4" id="panelDoOption">
+			<h:outputLabel value="#{msg['form.field.decision.do']}" />
+			<p:selectOneMenu style="width: 50px;"
+				value="#{decisionSelected.doOption}">
+				<p:ajax update="panelDoOption"  />
+				<f:selectItems value="#{bean.formFieldDoOptions}"
+							   var="doOption"
+							   itemValue="#{doOption}"
+							   itemLabel="#{msg[doOption.label]}"	 />
+			</p:selectOneMenu>
+			<p:spacer width="20" height="20" />
+			
+			<p:selectOneMenu style="width: 50px;" rendered="#{decisionSelected.doOption eq 'GOTO_NEXT'}"
+				value="#{bean.nextGroupIdSelected}">
+				<f:selectItem itemValue="0" itemLabel="#{msg['content.do.action.new.group.action']}" />
+				<f:selectItems value="#{bean.groupActions}"
+							   var="groupAction"
+							   itemValue="#{groupAction.rowId}"
+							   itemLabel="#{groupAction.name}"	 />
+			</p:selectOneMenu>
+			<p:spacer width="20" height="20" />
+			
+		</h:panelGrid>	
+	
+	    	
+	</h:form>	
+	
+	    
+	
+	    
+
+</ui:composition>

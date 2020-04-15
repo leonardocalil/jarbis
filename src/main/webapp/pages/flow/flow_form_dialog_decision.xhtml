@@ -1,0 +1,76 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:form id="frmDecisionFormDialog" rendered="#{bean.decisionSelected != null}">
+		<p:commandButton icon="ui-icon-disk" value="#{msg['form.button.save.label']}"
+								actionListener="#{bean.saveDecision}" style="position: absolute;right: 16px;"
+								update="frmFlowFormActions,frmFlowForm" />
+
+		<h:panelGrid columns="2">
+		
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.dialog.decision.field.decision.sequence.label']}" />
+			<p:inputText value="#{bean.decisionSelected.sequence}" readonly="true" />
+			
+			<h:outputLabel style="float: right;"
+				value="#{msg['content.flow.dialog.decision.field.decision.name.label']}" />
+			<p:inputText value="#{bean.decisionSelected.name}"
+				style="width: 400px;" 
+				required="true"
+				requiredMessage="#{msg['form.field.decision.name.required.label']}"/>  
+											
+		</h:panelGrid>
+		<p:separator />
+		
+			
+		<ui:include src="flow_form_decision_compare_editor.xhtml">
+			<ui:param name="decisionSelected" value="#{bean.decisionSelected}" />
+			<ui:param name="bean" value="#{bean}" />
+		</ui:include>	
+	</h:form>
+		
+	
+	<p:dialog id="dialogConfirmDeleteRelationalOperation"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmDeleteRelationalOperation" modal="false" minHeight="100" dynamic="true">
+		<h:form>
+			<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.register']}" /><br /><br />
+			<h:panelGrid columns="2">
+				<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+						        		actionListener="#{bean.doRemoveRelationalOperator()}"
+						        		update="@([id$=tableRelationalOperator])" 
+						        		oncomplete="PF('dialogConfirmDeleteRelationalOperation').hide()"
+						        		immediate="true"
+						        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+								 oncomplete="PF('dialogConfirmDeleteRelationalOperation').hide()" 
+								 immediate="true"
+								styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>
+	
+	<p:dialog id="dialogConfirmDeleteLogicalOperation"
+			header="#{msg['dialog.confirmation.header.label']}"
+			widgetVar="dialogConfirmDeleteLogicalOperation" modal="false" minHeight="100" dynamic="true">
+		<h:form>
+			<p:outputLabel value="#{msg['dialog.confirmation.confirm.remove.register']}" /><br /><br />
+			<h:panelGrid columns="2">
+				<p:commandButton value="#{msg['dialog.confirmation.yes.label']}" 	 
+						        		actionListener="#{bean.doRemoveLogicalOperator()}"
+						        		update="@([id$=tableDecisionCompare])" 
+						        		oncomplete="PF('dialogConfirmDeleteLogicalOperation').hide()"
+						        		immediate="true"
+						        		styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+				<p:commandButton value="#{msg['dialog.confirmation.cancel.label']}"
+								 oncomplete="PF('dialogConfirmDeleteLogicalOperation').hide()" 
+								 immediate="true"
+								styleClass="ui-confirmdialog-no" icon="ui-icon-close" />
+			</h:panelGrid>
+		</h:form>
+	</p:dialog>			
+
+</ui:composition>
